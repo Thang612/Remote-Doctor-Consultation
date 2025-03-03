@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { CardContent, Typography, Avatar, Container, Box, Grid, Paper } from "@mui/material";
 import BookingSchedule from "../../components/Doctor/BookingSchedule";
 import axios from "axios";
@@ -7,8 +7,10 @@ import axios from "axios";
 const DoctorDetail = () => {
   const { id } = useParams(); // Lấy ID từ URL
   const [doctor, setDoctor] = useState(null);
-
+const nav = useNavigate();
   useEffect(() => {
+
+
     axios.get('http://localhost:3000/doctor/'+ id).then((res)=> {
         setDoctor(res.data)
     }).catch((error) => {
@@ -19,7 +21,11 @@ const DoctorDetail = () => {
   if (!doctor) return <p>Loading...</p>;
 
   return (
-    <Container maxWidth="md" sx={{ mt: 5 }}>
+    <>
+<Container maxWidth="md" sx={{ mt: 5}}>
+  <Typography color="primary"><Typography variant="span" style={{cursor: "pointer"}} onClick={()=>{nav('/')}}>Trang chủ </Typography> / Bác sĩ</Typography>
+</Container>
+    <Container maxWidth="md" sx={{ mt: 2}}>
     <Paper elevation={3} sx={{ p: 1, borderRadius: 3 }}>
       <Grid container spacing={4} alignItems="center">
         {/* Avatar & Thông tin chính */}
@@ -59,9 +65,10 @@ const DoctorDetail = () => {
 
     {/* Lịch đặt khám */}
     <Box mt={5}>
-      <BookingSchedule doctorId={id} />
+      <BookingSchedule doctor={doctor} />
     </Box>
   </Container>
+  </>
   );
 };
 

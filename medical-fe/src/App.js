@@ -6,10 +6,14 @@ import { ThemeProvider } from '@emotion/react';
 import theme from './theme';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import DoctorDetail from './pages/Profile/Doctor';
-
-
+import { useEffect } from 'react';
 
 const App =() => {
+
+  useEffect(()=>{
+    localStorage.removeItem("user");
+  }, [])
+
   return (
     <>
     <GoogleOAuthProvider clientId="558699822073-bo52ighlvksekp2lj1q2b4f8stvi9a4r.apps.googleusercontent.com"> 

@@ -59,7 +59,7 @@ const Header = () => {
   return (
     <AppBar position="static" color="primary">
       <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
-        <img src={logo} alt="KhamBenhNe" style={{ height: "80px" }} />
+        <img src={logo} alt="KhamBenhNe" style={{ height: "80px" }}  />
 
         {!user ? (
           <>
