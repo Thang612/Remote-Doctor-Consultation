@@ -5,10 +5,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { DegreeModule } from './degree/degree.module';
-import { SpecialtyModule } from './specialty/specialty.module';
 import { Degree } from './degree/entities/degree.entity';
-import { Specialty } from './specialty/entities/specialty.entity';
 import { DoctorModule } from './doctor/doctor.module';
+import { Doctor } from './doctor/entities/doctor.entity';
+import { SpecialtyModule } from './specialty/specialty.module';
+import { Specialty } from './specialty/entities/specialty.entity';
+import { AuthModule } from './auth/auth.module';
+import { PatientModule } from './patient/patient.module';
+import { Patient } from './patient/entities/patient.entity';
+import { PaymentsModule } from './payments/payments.module';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { Appointment } from './appointments/entities/appointment.entity';
 
 @Module({
   imports: [
@@ -19,13 +26,17 @@ import { DoctorModule } from './doctor/doctor.module';
       username: 'root',
       password: 'root',
       database: 'medical1',
-      entities: [User, Degree, Specialty],
+      entities: [User, Degree, Doctor, Specialty, Patient, Appointment],
       synchronize: true,
     }),
     UserModule,
     DegreeModule,
-    SpecialtyModule,
     DoctorModule,
+    SpecialtyModule,
+    AuthModule,
+    PatientModule,
+    PaymentsModule,
+    AppointmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
