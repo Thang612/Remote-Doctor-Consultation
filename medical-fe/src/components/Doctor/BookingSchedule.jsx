@@ -5,6 +5,8 @@ import dayjs from "dayjs";
 import axios from "axios";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { ref, set } from "firebase/database";
+import { db } from "../../configs/firebase";
 
 const BookingSchedule = ({ doctor }) => {
   const doctorId = doctor.id;
@@ -13,7 +15,7 @@ const BookingSchedule = ({ doctor }) => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [openNoteModal, setOpenNoteModal] = useState(false);
   const [note, setNote] = useState('');
-  const [isLoading, setIsLoading] = useState(false);  // Loading state
+  const [isLoading, setIsLoading] = useState(false);
   const workingHours = ["08:00", "09:00", "10:00", "13:00", "14:00", "15:00", "16:00"];
 
   dayjs.extend(utc);
@@ -22,7 +24,7 @@ const BookingSchedule = ({ doctor }) => {
   // Handle date selection
   const handleSelectDate = (event) => {
     setSelectedDate(event.target.value);
-    setSelectedTime(""); // Reset time when the date changes
+    setSelectedTime("");
   };
 
   // Handle time selection
@@ -36,32 +38,47 @@ const BookingSchedule = ({ doctor }) => {
       return;
     }
     setSelectedTime(time);
-    setOpenNoteModal(true); // Open note modal when time is selected
+    setOpenNoteModal(true);
   };
 
   // Handle booking after successful payment
   const handleBooking = () => {
-    setIsLoading(true); // Start loading
-
-    const patientId = JSON.parse(localStorage.getItem("user")).patient.id;
+    setIsLoading(true);
+    const patient = JSON.parse(localStorage.getItem("user"));
     const formattedStartTime = dayjs(`${selectedDate} ${selectedTime}`)
       .tz('Asia/Ho_Chi_Minh', true)
       .format();
 
+    const appointmentRef = ref(db, `appointments/${doctorId}/notify${doctorId}${patient.patient.id}${Math.floor(Math.random() * 112323)}`);
+    
+    set(appointmentRef, {
+      messeger: `Bạn có một cuộc hẹn từ bệnh nhân ${patient.firstName} ${patient.lastName} vào ${selectedTime} - ${selectedDate}`,
+      patientId: patient.patient.id,
+      doctorId: doctorId,
+      status: 'notseen',
+    }).then(() => {
+      console.log("Lịch hẹn đã được tạo thành công!");
+      setIsLoading(false);
+    }).catch(error => {
+      console.error("Lỗi khi đặt lịch hẹn:", error);
+      alert("Có lỗi khi đặt lịch, vui lòng thử lại!");
+      setIsLoading(false);
+    });
+
     axios.post('http://localhost:3000/appointments/', {
       date: dayjs().format("YYYY-MM-DD"),
       doctor: doctorId,
-      patient: patientId,
+      patient: patient.patient.id,
       startTime: formattedStartTime,
       note: note,
     })
     .then(() => {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
       alert(`Bạn đã đặt lịch hẹn vào ngày ${dayjs(selectedDate).format("DD/MM/YYYY")} lúc ${selectedTime}`);
-      setOpenPaymentModal(false); // Close payment modal after booking
+      setOpenPaymentModal(false);
     })
     .catch((error) => {
-      setIsLoading(false); // Stop loading in case of error
+      setIsLoading(false);
       console.log(error);
       alert("Đặt lịch không thành công. Vui lòng thử lại.");
     });
@@ -69,13 +86,15 @@ const BookingSchedule = ({ doctor }) => {
 
   // Handle payment success
   const handlePaymentSuccess = () => {
-    handleBooking(); // Proceed to booking after payment is successful
+    console.log("Gọi handleBooking sau khi thanh toán thành công...");
+    handleBooking();
+    setOpenPaymentModal(false);
   };
 
   const handlePaymentClick = () => {
-    setNote(document.getElementById('note').value)
-    setOpenPaymentModal(true); // Open payment modal
-    setOpenNoteModal(false); // Close note modal
+    setNote(document.getElementById('note').value);
+    setOpenPaymentModal(true);
+    setOpenNoteModal(false);
   };
 
   // Note modal content
@@ -85,7 +104,6 @@ const BookingSchedule = ({ doctor }) => {
       <DialogContent>
         <DialogContentText>
           Nhập nội dung bạn cần bác sĩ lưu ý trước khi khám.
-          Nội dung sẽ hữu ích giúp bác sĩ có những phán đoán sơ bộ ban đầu.
         </DialogContentText>
         <TextField
           id='note'
@@ -106,12 +124,7 @@ const BookingSchedule = ({ doctor }) => {
 
   // Payment modal content
   const PaymentModal = () => (
-    <Modal
-      open={openPaymentModal}
-      onClose={() => setOpenPaymentModal(false)}
-      aria-labelledby="payment-modal-title"
-      aria-describedby="payment-modal-description"
-    >
+    <Modal open={openPaymentModal} onClose={() => setOpenPaymentModal(false)}>
       <Box sx={styles.modalBox}>
         <Typography variant="h6" gutterBottom>
           Thanh toán
@@ -120,27 +133,33 @@ const BookingSchedule = ({ doctor }) => {
           Bạn có chắc chắn muốn thanh toán để xác nhận lịch hẹn của mình?
         </Typography>
         <Typography>Chi phí: {doctor.fee}$</Typography>
-        {/* PayPal Button */}
-        <PayPalScriptProvider options={{ "client-id": "ATpjUjaxfhH7tz2Ck2Qt51OKYOggjZj70hFVsyScAEyl3LaT-jj07QjV8FLgPjCcmypxcNcdfatuMz3c" }}>
+        <PayPalScriptProvider options={{ "client-id": "sandbox" }}>
           <PayPalButtons
             style={{ layout: "vertical" }}
             createOrder={(data, actions) => {
               return actions.order.create({
                 purchase_units: [{
                   amount: {
-                    value: doctor.fee,
+                    currency_code: "USD",
+                    value: doctor.fee.toString(),
                   },
                 }],
               });
             }}
             onApprove={(data, actions) => {
-              return actions.order.capture().then(function(details) {
-                alert("Thanh toán thành công!");
-                handlePaymentSuccess();
-              });
-            }}
-            onError={(err) => {
-              console.log("Error: ", err);
+              console.log("Thanh toán thành công, dữ liệu trả về:", data);
+              return actions.order.capture()
+                .then(function (details) {
+                  console.log("Chi tiết đơn hàng:", details);
+                  alert("Thanh toán thành công!");
+                  handlePaymentSuccess();
+                  setOpenPaymentModal(false); // Đóng modal ngay sau khi thanh toán
+                  return Promise.resolve(); // Báo cho PayPal biết giao dịch đã hoàn tất
+                })
+                .catch(err => {
+                  console.error("Lỗi khi xác nhận thanh toán:", err);
+                  alert("Có lỗi xảy ra khi xác nhận thanh toán!");
+                });
             }}
           />
         </PayPalScriptProvider>
@@ -150,38 +169,19 @@ const BookingSchedule = ({ doctor }) => {
 
   return (
     <div style={{ marginTop: "20px" }}>
-      <Typography gutterBottom fontWeight={'bold'}>
-        Ngày Hẹn
-      </Typography>
-      <TextField
-        type="date"
-        value={selectedDate}
-        onChange={handleSelectDate}
-        sx={{ mb: 2 }}
-      />
-      <Typography gutterBottom fontWeight={'bold'}>
-        Giờ Hẹn:
-      </Typography>
-      <Grid container spacing={2} justifyContent="left" marginBottom={5}>
+      <Typography gutterBottom fontWeight={'bold'}>Ngày Hẹn</Typography>
+      <TextField type="date" value={selectedDate} onChange={handleSelectDate} sx={{ mb: 2 }} />
+      <Typography gutterBottom fontWeight={'bold'}>Giờ Hẹn:</Typography>
+      <Grid container spacing={2}>
         {workingHours.map((hour, index) => (
           <Grid item key={index}>
-            <Button
-              variant={selectedTime === hour ? "contained" : "outlined"}
-              color="primary"
-              onClick={() => handleSelectTime(hour)}
-            >
+            <Button variant={selectedTime === hour ? "contained" : "outlined"} color="primary" onClick={() => handleSelectTime(hour)}>
               {hour}
             </Button>
           </Grid>
         ))}
       </Grid>
-
-      {isLoading && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-          <CircularProgress />
-        </div>
-      )}
-
+      {isLoading && <CircularProgress />}
       {openNoteModal && <NoteModal />}
       {openPaymentModal && <PaymentModal />}
     </div>
