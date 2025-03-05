@@ -4,10 +4,13 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Doctor } from '../../doctor/entities/doctor.entity';
 import { User } from '../../user/entities/user.entity';
 import { Patient } from 'src/patient/entities/patient.entity';
+import { Payments } from 'src/payments/entities/payments.entity';
 
 @Entity()
 export class Appointment {
@@ -31,4 +34,8 @@ export class Appointment {
 
   @Column()
   note: string;
+
+  @OneToOne(() => Payments, (payment) => payment.appointment)
+  @JoinColumn()
+  payment: Payments;
 }

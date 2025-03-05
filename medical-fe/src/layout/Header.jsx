@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -11,17 +11,25 @@ import {
   MenuItem,
   Avatar,
   IconButton,
+  Box,
+  Typography,
 } from "@mui/material";
 import logo from "../assets/LogoHeader.png";
 import LoginIcon from "@mui/icons-material/Login";
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { GoogleLogin, useGoogleOneTapLogin } from "@react-oauth/google";
 import axios from "axios";
+import { onValue, ref } from "firebase/database";
+import { db } from "../configs/firebase";
 
 const Header = () => {
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [openDialog, setOpenDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
+  const [notify, setNotify] = useState(["Không có thông báo"])
+const [UnseenNotifications, setUnseenNotifications] = useState()
 
   // ✅ Hàm xử lý đăng nhập bằng Google
   const handleGoogleLogin = async (credentialResponse) => {
@@ -48,6 +56,34 @@ const Header = () => {
       console.log("Google One Tap Failed");
     },
   });
+
+  useEffect(() => {
+    if (user !== null && user.doctor) {
+      const appointmentRef = ref(db, `appointments/${user.doctor.id}`);
+  
+      // Lắng nghe dữ liệu từ Firebase
+    const unsubscribe = onValue(appointmentRef, (snapshot) => {
+      if (snapshot.exists()) {
+        let notifications = Object.values(snapshot.val());
+
+        // Sắp xếp thông báo theo createDate giảm dần (mới nhất lên đầu)
+        notifications.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
+        setNotify(notifications);
+
+        // 🔥 Đếm số lượng thông báo chưa đọc (status === "notseen")
+        const unseenCount = notifications.filter(n => n.status === "notseen").length;
+        setUnseenNotifications(unseenCount);
+        
+      }
+      
+    });
+  
+      // Cleanup listener khi component unmount
+      return () => unsubscribe();
+    }
+  }, [user]);
+  
+ 
 
   // ✅ Xử lý logout
   const handleLogout = () => {
@@ -99,11 +135,59 @@ const Header = () => {
           </>
         ) : (
           <>
+<Box sx={{display: 'flex', alignItems:'center'}}>
+{user.doctor && (
+                  <IconButton sx={{ marginRight: '20px', cursor: 'pointer' }} onClick={(e) => setNotificationAnchorEl(e.currentTarget)}>
+                    <NotificationsIcon  /> <Typography sx={{display: 'inline-block',
+            position: 'absolute',color: 'white', fontWeight: 'bold',
+            top: '-3px',
+            right: '-3px',
+            p: '1px 5px', }} >{UnseenNotifications}</Typography>
+                  </IconButton>
+                )}
+
+                {/* Notifications Menu */}
+<Menu
+  anchorEl={notificationAnchorEl}
+  open={Boolean(notificationAnchorEl)}
+  onClose={() => setNotificationAnchorEl(null)}
+  PaperProps={{
+    sx: {
+      maxHeight: 300, // Đặt chiều cao tối đa để xuất hiện scroll
+      overflowY: 'auto', // Cho phép cuộn theo chiều dọc
+    },
+  }}
+>
+  {notify.length > 0 ? (
+    notify.map((notif, index) => (
+      <MenuItem key={index} sx={{ p: 2 }} title={notif.title}>
+        {notif.status === 'notseen'&& <Typography
+          variant="span"
+          sx={{
+            display: 'inline-block',
+            position: 'absolute',
+            top: '-7px',
+            left: '0px',
+            p: '2px',
+          }}
+          color="primary"
+        >
+          new
+        </Typography>}
+        {notif.messeger}
+      </MenuItem>
+    ))
+  ) : (
+    <MenuItem>Không có thông báo</MenuItem>
+  )}
+</Menu>
+
             {/* Avatar + Menu */}
             <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
               <Avatar src={user.doctor ? `/avatar_doctor/${user.doctor.id}.png` : `/avatar_patient/${user.patient.id}.png`}
  alt={user.firstName} />
             </IconButton>
+            </Box>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
               <MenuItem>{user.firstName} {user.lastName}</MenuItem>
               <MenuItem onClick={() => alert("Go to Profile")}>Profile</MenuItem>
@@ -112,7 +196,9 @@ const Header = () => {
                 Logout
               </MenuItem>
             </Menu>
+            
           </>
+
         )}
       </Toolbar>
     </AppBar>

@@ -42,7 +42,7 @@ const BookingSchedule = ({ doctor }) => {
   };
 
   // Handle booking after successful payment
-  const handleBooking = () => {
+  const handleBooking = (details) => {
     setIsLoading(true);
     const patient = JSON.parse(localStorage.getItem("user"));
     const formattedStartTime = dayjs(`${selectedDate} ${selectedTime}`)
@@ -56,6 +56,8 @@ const BookingSchedule = ({ doctor }) => {
       patientId: patient.patient.id,
       doctorId: doctorId,
       status: 'notseen',
+      title:note,
+      createDate: new Date().toISOString()
     }).then(() => {
       console.log("Lịch hẹn đã được tạo thành công!");
       setIsLoading(false);
@@ -71,6 +73,11 @@ const BookingSchedule = ({ doctor }) => {
       patient: patient.patient.id,
       startTime: formattedStartTime,
       note: note,
+      payment: {
+        date: dayjs().format("YYYY-MM-DD"), 
+        total: doctor.fee, 
+        idPayment: details.id
+      }
     })
     .then(() => {
       setIsLoading(false);
@@ -85,9 +92,9 @@ const BookingSchedule = ({ doctor }) => {
   };
 
   // Handle payment success
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (details) => {
     console.log("Gọi handleBooking sau khi thanh toán thành công...");
-    handleBooking();
+    handleBooking(details);
     setOpenPaymentModal(false);
   };
 
@@ -152,7 +159,7 @@ const BookingSchedule = ({ doctor }) => {
                 .then(function (details) {
                   console.log("Chi tiết đơn hàng:", details);
                   alert("Thanh toán thành công!");
-                  handlePaymentSuccess();
+                  handlePaymentSuccess(details);
                   setOpenPaymentModal(false); // Đóng modal ngay sau khi thanh toán
                   return Promise.resolve(); // Báo cho PayPal biết giao dịch đã hoàn tất
                 })

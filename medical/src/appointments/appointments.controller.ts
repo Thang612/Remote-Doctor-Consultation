@@ -9,7 +9,7 @@ export class AppointmentsController {
   // ✅ API POST: Tạo lịch hẹn mới
   @Post()
   async create(@Body() body: Partial<Appointment>) {
-    if (!body.date || !body.doctor || !body.patient) {
+    if (!body.date || !body.doctor || !body.patient || !body.payment) {
       throw new BadRequestException('Thiếu thông tin đặt lịch');
     }
 

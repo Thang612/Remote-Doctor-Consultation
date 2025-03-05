@@ -16,6 +16,7 @@ import { Patient } from './patient/entities/patient.entity';
 import { PaymentsModule } from './payments/payments.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { Appointment } from './appointments/entities/appointment.entity';
+import { Payments } from './payments/entities/payments.entity';
 
 @Module({
   imports: [
@@ -26,7 +27,15 @@ import { Appointment } from './appointments/entities/appointment.entity';
       username: 'root',
       password: 'root',
       database: 'medical1',
-      entities: [User, Degree, Doctor, Specialty, Patient, Appointment],
+      entities: [
+        User,
+        Degree,
+        Doctor,
+        Specialty,
+        Patient,
+        Appointment,
+        Payments,
+      ],
       synchronize: true,
     }),
     UserModule,
