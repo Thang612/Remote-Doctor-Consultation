@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Appointment } from './entities/appointment.entity';
 import * as dayjs from 'dayjs'; // Thư viện xử lý ngày
 import * as crypto from 'crypto'; // Thư viện tạo chuỗi ngẫu nhiên
@@ -50,5 +50,55 @@ export class AppointmentsService {
       payment: newPayment,
     });
     return await this.appointmentRepo.save(appointment);
+  }
+
+  // ✅ Lấy danh sách lịch hẹn theo patientId
+  async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
+    return await this.appointmentRepo.find({
+      where: { patient: { id: patientId } },
+      relations: ['doctor', 'patient', 'payment'], // Load thêm dữ liệu liên quan
+    });
+  }
+
+  // ✅ Lấy danh sách lịch hẹn theo doctorId
+  async getAppointmentsByDoctorId(doctorId: number): Promise<Appointment[]> {
+    return await this.appointmentRepo.find({
+      where: { doctor: { id: doctorId } },
+      relations: ['doctor', 'patient', 'payment'],
+    });
+  }
+
+  // ✅ Lọc lịch hẹn theo patientId và startTime
+  async getAppointmentsByPatientIdAndTime(
+    patientId: number,
+    startTime: string,
+  ): Promise<Appointment[]> {
+    return await this.appointmentRepo.find({
+      where: {
+        patient: { id: patientId },
+        startTime: Between(
+          new Date(startTime),
+          new Date(startTime + ' 23:59:59'),
+        ), // Lọc theo ngày
+      },
+      relations: ['doctor', 'patient', 'payment'],
+    });
+  }
+
+  // ✅ Lọc lịch hẹn theo doctorId và startTime
+  async getAppointmentsByDoctorIdAndTime(
+    doctorId: number,
+    startTime: string,
+  ): Promise<Appointment[]> {
+    return await this.appointmentRepo.find({
+      where: {
+        doctor: { id: doctorId },
+        startTime: Between(
+          new Date(startTime),
+          new Date(startTime + ' 23:59:59'),
+        ),
+      },
+      relations: ['doctor', 'patient', 'payment'],
+    });
   }
 }

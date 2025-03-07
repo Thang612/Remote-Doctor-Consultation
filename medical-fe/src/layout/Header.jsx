@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -13,6 +13,7 @@ import {
   IconButton,
   Box,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import logo from "../assets/LogoHeader.png";
 import LoginIcon from "@mui/icons-material/Login";
@@ -21,15 +22,18 @@ import { GoogleLogin, useGoogleOneTapLogin } from "@react-oauth/google";
 import axios from "axios";
 import { onValue, ref } from "firebase/database";
 import { db } from "../configs/firebase";
+import { Link } from "react-router-dom";
+import { UserContext } from "../App";
 
 const Header = () => {
   const [user, setUser] = useState(null);
+  const [userContext, dispatch]=  useContext(UserContext)
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [openDialog, setOpenDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const [notify, setNotify] = useState(["Không có thông báo"])
-const [UnseenNotifications, setUnseenNotifications] = useState()
+  const [UnseenNotifications, setUnseenNotifications] = useState()
 
   // ✅ Hàm xử lý đăng nhập bằng Google
   const handleGoogleLogin = async (credentialResponse) => {
@@ -42,6 +46,11 @@ const [UnseenNotifications, setUnseenNotifications] = useState()
 
       console.log("User from Backend:", response.data);
       setUser(response.data);
+      dispatch({
+        type: "login",
+        payload: response.data
+    });
+    console.log(userContext)
       localStorage.setItem("user", JSON.stringify(response.data));
       setOpenDialog(false);
     } catch (error) {
@@ -89,6 +98,10 @@ const [UnseenNotifications, setUnseenNotifications] = useState()
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    dispatch({
+      type: "logout"
+  });
+  
     setAnchorEl(null);
   };
 
@@ -160,7 +173,8 @@ const [UnseenNotifications, setUnseenNotifications] = useState()
 >
   {notify.length > 0 ? (
     notify.map((notif, index) => (
-      <MenuItem key={index} sx={{ p: 2 }} title={notif.title}>
+      <Tooltip title={notif.title}>
+      <MenuItem key={index} sx={{ p: 2 }} >
         {notif.status === 'notseen'&& <Typography
           variant="span"
           sx={{
@@ -176,6 +190,7 @@ const [UnseenNotifications, setUnseenNotifications] = useState()
         </Typography>}
         {notif.messeger}
       </MenuItem>
+      </Tooltip>
     ))
   ) : (
     <MenuItem>Không có thông báo</MenuItem>
@@ -190,8 +205,7 @@ const [UnseenNotifications, setUnseenNotifications] = useState()
             </Box>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
               <MenuItem>{user.firstName} {user.lastName}</MenuItem>
-              <MenuItem onClick={() => alert("Go to Profile")}>Profile</MenuItem>
-              <MenuItem onClick={() => alert("Go to Settings")}>Settings</MenuItem>
+              <MenuItem><Link to='/profile'>Profile</Link></MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
                 Logout
               </MenuItem>
