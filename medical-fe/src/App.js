@@ -9,6 +9,7 @@ import DoctorDetail from './pages/Detail/Doctor';
 import { createContext, useEffect, useReducer } from 'react';
 import Profile from './pages/Profile/Profile';
 import UserReducer from './reducers/UserReducer';
+import { VideoRoom } from './VideoCall/VideoRoom';
 
 export const UserContext = createContext()
 
@@ -30,6 +31,7 @@ const App =() => {
         <Route path='/' element={<Home/>}></Route>
         <Route path='/doctor/:id' element={<DoctorDetail/>}></Route>
         <Route path='/profile' element={<Profile/>}></Route>
+        <Route path='/videocall/:idMeeting' element={<VideoRoom/>}></Route>
       </Routes>
     </BrowserRouter>
     </ThemeProvider>

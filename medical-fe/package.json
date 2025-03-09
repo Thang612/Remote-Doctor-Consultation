@@ -5,6 +5,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@google-cloud/translate": "^8.5.1",
+    "@google/generative-ai": "^0.24.0",
     "@mui/icons-material": "^6.4.6",
     "@mui/material": "^6.4.6",
     "@paypal/react-paypal-js": "^8.8.2",
@@ -13,6 +15,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "agora-rtc-sdk-ng": "^4.23.2",
     "axios": "^1.8.1",
     "dayjs": "^1.11.13",
     "firebase": "^11.4.0",

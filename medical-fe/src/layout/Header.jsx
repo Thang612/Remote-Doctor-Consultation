@@ -34,7 +34,8 @@ const Header = () => {
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const [notify, setNotify] = useState(["Không có thông báo"])
   const [UnseenNotifications, setUnseenNotifications] = useState()
-
+  const [openChatBox, setOpenChatBox] = useState(false);
+  
   // ✅ Hàm xử lý đăng nhập bằng Google
   const handleGoogleLogin = async (credentialResponse) => {
     console.log("Google Login Success:", credentialResponse);

@@ -17,6 +17,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { Appointment } from './appointments/entities/appointment.entity';
 import { Payments } from './payments/entities/payments.entity';
+import { VideoCallModule } from './video-call/video-call.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { Payments } from './payments/entities/payments.entity';
     PatientModule,
     PaymentsModule,
     AppointmentsModule,
+    VideoCallModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,8 +1,8 @@
+import { Avatar } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
 
-export const VideoPlayer = ({ user }) => {
-  const videoRef = useRef(null);
+export const VideoPlayer = ({ user, isLocal, username, style, avatar }) => {
+  const videoRef = useRef();
 
   useEffect(() => {
     if (user.videoTrack) {
@@ -14,53 +14,35 @@ export const VideoPlayer = ({ user }) => {
         user.videoTrack.stop();
       }
     };
-  }, [user]);
+  }, [user.videoTrack]);
+
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        height: '80vh',
-        padding: '10px',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-        position: 'relative',
-        backgroundColor: '#000', // Background đen để làm nổi bật video
-        display: 'flex',
-        justifyContent: 'center',
+    <div style={{ ...style,  borderRadius: '8px', overflow: 'hidden' }}>
+      {/* Hiển thị video */}
+      <div ref={videoRef} style={{ width: '100%', height: '100%' }} />
+
+      {/* Hiển thị username */}
+      <div style={{
+        display:'flex',
         alignItems: 'center',
-      }}
-    >
-      <Box
-        component="video"
-        ref={videoRef}
-        sx={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          borderRadius: '12px',
-          border: '2px solid #ffffff', // Viền trắng mỏng để nổi bật video
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-        }}
-        autoPlay
-        playsInline
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          color: '#fff',
-          padding: '4px 8px',
-          borderRadius: '8px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-        }}
-      >
-        UID: {user.uid} {/* Hiển thị UID của user */}
-      </Box>
-    </Box>
+        position: 'absolute',
+        bottom: '8px',
+        left: '8px',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        color: '#fff',
+        padding: '4px 8px',
+        borderRadius: '4px',
+        fontSize: '14px',
+        zIndex: 10,
+      }}>
+         <Avatar 
+                  src={avatar} 
+                  sx={{ width: 28, height: 28, marginRight: '8px' }} 
+                />
+        {username}
+      </div>
+    </div>
   );
 };
+

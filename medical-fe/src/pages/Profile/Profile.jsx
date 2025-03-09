@@ -37,6 +37,8 @@ const Appointments = () => {
     fetchAppointments();
   }, [user, selectedDate]);
 
+  
+
   if (!user) {
     return <Typography variant="h6" textAlign="center">Bạn chưa đăng nhập!</Typography>;
   }
@@ -145,7 +147,7 @@ const Appointments = () => {
                       <TableCell>
                         <Button
                           component={Link}
-                          to={`/appointment/${appt.id}`}
+                          to={`/videocall/${appt.idMeeting}`}
                           variant="contained"
                           color="primary"
                           size="small"
