@@ -5,7 +5,7 @@ import GTranslateIcon from '@mui/icons-material/GTranslate';
 import { onValue, push, ref } from 'firebase/database';
 import { db } from '../../configs/firebase';
 import { UserContext } from '../../App';
-import axios from 'axios';
+import { translateMessage } from '../../configs/translate';
 
 const ChatBox = ({ idMeeting }) => {
   const [user] = useContext(UserContext);
@@ -42,27 +42,16 @@ const ChatBox = ({ idMeeting }) => {
     }
   }, [idMeeting]);
 
-  // ✅ Dịch tin nhắn
-  const translateMessage = async (text, messageId) => {
+  const handleTranslate = async (text, index) => {
     try {
-      const response = await axios.post('https://libretranslate.com/translate', {
-        q: text,
-        source: 'auto',
-        target: language,
-        format: 'text',
-      }, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const translatedText = response.data.translatedText;
-
-      // ✅ Cập nhật bản dịch vào state
-      setTranslatedMessages(prev => ({
+      const translatedText = await translateMessage(text, language);
+      setTranslatedMessages((prev) => ({
         ...prev,
-        [messageId]: translatedText
+        [index]: translatedText,
       }));
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error("Translation error:", error);
+      alert("Translation failed. Please try again.");
     }
   };
 
@@ -177,7 +166,7 @@ const ChatBox = ({ idMeeting }) => {
                 <Tooltip title="Translate">
                   <IconButton
                     size="small"
-                    onClick={() => translateMessage(msg.text, index)}
+                    onClick={() => handleTranslate(msg.text, index)}
                     sx={{ marginLeft: '8px' }}
                   >
                     <GTranslateIcon fontSize="small" />

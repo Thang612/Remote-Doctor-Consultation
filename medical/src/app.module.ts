@@ -18,6 +18,9 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { Appointment } from './appointments/entities/appointment.entity';
 import { Payments } from './payments/entities/payments.entity';
 import { VideoCallModule } from './video-call/video-call.module';
+import { TranslateModule } from './translate/translate.module';
+import { PrescriptionsModule } from './prescriptions/prescriptions.module';
+import { PrescriptionDetailsModule } from './prescription-details/prescription-details.module';
 
 @Module({
   imports: [
@@ -48,6 +51,9 @@ import { VideoCallModule } from './video-call/video-call.module';
     PaymentsModule,
     AppointmentsModule,
     VideoCallModule,
+    TranslateModule,
+    PrescriptionsModule,
+    PrescriptionDetailsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
