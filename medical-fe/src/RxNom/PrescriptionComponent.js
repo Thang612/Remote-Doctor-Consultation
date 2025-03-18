@@ -1,7 +1,6 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef } from 'react';
 import { Box, TextField, Button, Typography, List, ListItem, ListItemText, CircularProgress, Paper } from '@mui/material';
 import axios from 'axios';
-import { UserContext } from '../App';
 
 
 const PrescriptionComponent = ({ idMeeting }) => {
@@ -31,7 +30,6 @@ const PrescriptionComponent = ({ idMeeting }) => {
   const [prescriptionNote, setPrescriptionNote] = useState('Nghỉ ngơi trong 2 ngày');
   const [submitting, setSubmitting] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [user] = useContext(UserContext)
 
   const inputRef = useRef();
 
@@ -135,9 +133,7 @@ const PrescriptionComponent = ({ idMeeting }) => {
       console.log(prescriptionData); // Kiểm tra xem dữ liệu đúng chưa
       await axios.post(`http://localhost:3000/prescriptions/${idMeeting}`, prescriptionData);
       alert('Đơn thuốc đã được gửi thành công');
-      await axios.patch(`http://localhost:3000/appointments/${idMeeting}/status`, {
-        status: 'done',
-      });
+
       setSelectedMedications([]);
       setPrescriptionNote('');
       setDiagnosis(''); // Reset Chẩn đoán

@@ -19,8 +19,10 @@ import { Appointment } from './appointments/entities/appointment.entity';
 import { Payments } from './payments/entities/payments.entity';
 import { VideoCallModule } from './video-call/video-call.module';
 import { TranslateModule } from './translate/translate.module';
-import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { PrescriptionDetailsModule } from './prescription-details/prescription-details.module';
+import { Prescriptions } from './prescriptions/entities/prescriptions.entity';
+import { PrescriptionModule } from './prescriptions/prescriptions.module';
+import { PrescriptionDetails } from './prescription-details/entities/prescription-details.entity';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { PrescriptionDetailsModule } from './prescription-details/prescription-d
         Patient,
         Appointment,
         Payments,
+        Prescriptions,
+        PrescriptionDetails,
       ],
       synchronize: true,
     }),
@@ -52,7 +56,7 @@ import { PrescriptionDetailsModule } from './prescription-details/prescription-d
     AppointmentsModule,
     VideoCallModule,
     TranslateModule,
-    PrescriptionsModule,
+    PrescriptionModule,
     PrescriptionDetailsModule,
   ],
   controllers: [AppController],

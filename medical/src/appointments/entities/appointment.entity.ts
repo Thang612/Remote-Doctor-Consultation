@@ -11,6 +11,7 @@ import { Doctor } from '../../doctor/entities/doctor.entity';
 import { User } from '../../user/entities/user.entity';
 import { Patient } from 'src/patient/entities/patient.entity';
 import { Payments } from 'src/payments/entities/payments.entity';
+import { Prescriptions } from 'src/prescriptions/entities/prescriptions.entity';
 
 @Entity()
 export class Appointment {
@@ -38,4 +39,8 @@ export class Appointment {
   @OneToOne(() => Payments, (payment) => payment.appointment)
   @JoinColumn()
   payment: Payments;
+
+  @OneToOne(() => Prescriptions, (prescriptions) => prescriptions.appointment)
+  @JoinColumn()
+  prescriptions: Prescriptions;
 }

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { 
   Avatar, Grid, Container, Typography, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Paper, TextField, CircularProgress, 
-  Button 
+  Button, Dialog, DialogActions, DialogContent, DialogTitle 
 } from "@mui/material";
 import axios from "axios";
 import { UserContext } from "../../App";
@@ -13,6 +13,8 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);  // State for dialog visibility
+  const [currentPrescription, setCurrentPrescription] = useState(null);  // State for current prescription details
 
   useEffect(() => {
     if (!user) return;
@@ -37,7 +39,15 @@ const Appointments = () => {
     fetchAppointments();
   }, [user, selectedDate]);
 
-  
+  const handleDialogOpen = (prescription) => {
+    setCurrentPrescription(prescription);
+    setOpenDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setCurrentPrescription(null);
+  };
 
   if (!user) {
     return <Typography variant="h6" textAlign="center">Bạn chưa đăng nhập!</Typography>;
@@ -107,7 +117,7 @@ const Appointments = () => {
                     <TableCell><strong>Bác sĩ / Bệnh nhân</strong></TableCell>
                     <TableCell><strong>Trạng thái</strong></TableCell>
                     <TableCell><strong>Chi tiết</strong></TableCell>
-                    <TableCell><strong>Hành động</strong></TableCell> {/* ✅ Cột mới */}
+                    <TableCell><strong>Hành động</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -143,19 +153,29 @@ const Appointments = () => {
                       {/* Ghi chú */}
                       <TableCell>{appt.note || "Không có ghi chú"}</TableCell>
 
-                      {/* ✅ Nút Chi Tiết */}
+                      {/* Hành động */}
                       <TableCell>
-                        <Button
-                          component={Link}
-                          to={`/videocall/${appt.idMeeting}`}
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                        >
-                          Khám bệnh
-                        </Button>
+                        {appt.prescriptions ? (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => handleDialogOpen(appt.prescriptions)}
+                          >
+                            Xem đơn thuốc
+                          </Button>
+                        ) : (
+                          <Button
+                            component={Link}
+                            to={`/videocall/${appt.idMeeting}`}
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                          >
+                            Khám bệnh
+                          </Button>
+                        )}
                       </TableCell>
-
                     </TableRow>
                   ))}
                 </TableBody>
@@ -164,6 +184,60 @@ const Appointments = () => {
           )}
         </Grid>
       </Grid>
+
+      {/* Dialog for Prescription Details */}
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle fontWeight={'bold'} fontSize={'24px'} color="primary">Chi tiết đơn thuốc</DialogTitle>
+        <DialogContent>
+          {currentPrescription ? (
+            <>
+              <Typography variant="body1">Chẩn đoán: {currentPrescription.diagnosis}</Typography>
+              <Typography variant="body1">Triệu chứng: {currentPrescription.symptom}</Typography>
+              <Typography variant="body1">Ghi chú: {currentPrescription.note}</Typography>
+              <Table>
+                <TableHead>
+                  <TableRow >
+                    <TableCell><strong>Thuốc</strong></TableCell>
+                    <TableCell><strong>Buổi sáng</strong></TableCell>
+                    <TableCell><strong>Buổi trưa</strong></TableCell>
+                    <TableCell><strong>Buổi chiều</strong></TableCell>
+                    <TableCell><strong>Buổi tối</strong></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+  {currentPrescription.details.map((detail, index) => (
+    <React.Fragment key={index}>
+      <TableRow>
+        <TableCell sx={{ color: 'primary.main' }}>{detail.medical}</TableCell>
+        <TableCell>{detail.morning}</TableCell>
+        <TableCell>{detail.noon}</TableCell>
+        <TableCell>{detail.afternoon}</TableCell>
+        <TableCell>{detail.night}</TableCell>
+      </TableRow>
+      {/* New row for the note */}
+      {detail.note && (
+        <TableRow>
+          <TableCell colSpan={5} sx={{ paddingLeft: 2 }}>
+            <Typography variant="body2" color="textSecondary">
+              <strong>Ghi chú:</strong> {detail.note}
+            </Typography>
+          </TableCell>
+        </TableRow>
+      )}
+    </React.Fragment>
+  ))}
+</TableBody>
+
+              </Table>
+            </>
+          ) : (
+            <Typography variant="body1">Không có thông tin đơn thuốc.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">Đóng</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

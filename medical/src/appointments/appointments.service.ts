@@ -56,7 +56,13 @@ export class AppointmentsService {
   async getAppointmentsByPatientId(patientId: number): Promise<Appointment[]> {
     return await this.appointmentRepo.find({
       where: { patient: { id: patientId } },
-      relations: ['doctor', 'patient', 'payment'], // Load thêm dữ liệu liên quan
+      relations: [
+        'doctor',
+        'patient',
+        'payment',
+        'prescriptions',
+        'prescriptions.details',
+      ], // Load thêm dữ liệu liên quan
     });
   }
 
@@ -64,7 +70,13 @@ export class AppointmentsService {
   async getAppointmentsByDoctorId(doctorId: number): Promise<Appointment[]> {
     return await this.appointmentRepo.find({
       where: { doctor: { id: doctorId } },
-      relations: ['doctor', 'patient', 'payment'],
+      relations: [
+        'doctor',
+        'patient',
+        'payment',
+        'prescriptions',
+        'prescriptions.details',
+      ],
     });
   }
 
@@ -81,7 +93,13 @@ export class AppointmentsService {
           new Date(startTime + ' 23:59:59'),
         ), // Lọc theo ngày
       },
-      relations: ['doctor', 'patient', 'payment'],
+      relations: [
+        'doctor',
+        'patient',
+        'payment',
+        'prescriptions',
+        'prescriptions.details',
+      ],
     });
   }
 
@@ -98,7 +116,13 @@ export class AppointmentsService {
           new Date(startTime + ' 23:59:59'),
         ),
       },
-      relations: ['doctor', 'patient', 'payment'],
+      relations: [
+        'doctor',
+        'patient',
+        'payment',
+        'prescriptions',
+        'prescriptions.details',
+      ],
     });
   }
 }

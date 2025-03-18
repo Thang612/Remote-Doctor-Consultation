@@ -1,4 +1,12 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Appointment } from 'src/appointments/entities/appointment.entity';
+import { PrescriptionDetails } from 'src/prescription-details/entities/prescription-details.entity';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Prescriptions {
@@ -14,6 +22,9 @@ export class Prescriptions {
   @Column()
   note: string;
 
-  @OneToOne(() => Prescriptions, (prescriptions) => appointment.prescriptions)
-  prescriptions: Prescriptions;
+  @OneToMany(() => PrescriptionDetails, (detail) => detail.prescription)
+  details: PrescriptionDetails[];
+
+  @OneToOne(() => Appointment, (appointment) => appointment.prescriptions)
+  appointment: Appointment;
 }

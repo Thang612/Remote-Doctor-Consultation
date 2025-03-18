@@ -19,6 +19,7 @@
     "axios": "^1.8.1",
     "dayjs": "^1.11.13",
     "firebase": "^11.4.0",
+    "franc-min": "^6.2.0",
     "google-translate-api": "^2.3.0",
     "lodash.debounce": "^4.0.8",
     "react": "^19.0.0",

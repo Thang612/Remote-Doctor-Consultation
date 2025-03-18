@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { VideoPlayer } from './VideoPlayer';
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Button, Dialog, IconButton } from '@mui/material';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import ChatBox from '../components/VideoCall/ChatBox';
 import CloseIcon from '@mui/icons-material/Close';
-
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import PrescriptionComponent from '../RxNom/PrescriptionComponent';
+import AudioVideoRecorder from '../components/LiveCaption/LiveCaption';
 
 const APP_ID = '718f01f1af4847bfa65a2cb1bb454b00';
 
@@ -49,7 +51,8 @@ export const VideoRoom = () => {
   const [client, setClient] = useState(null);
   const [localTracks, setLocalTracks] = useState([]);
   const [channel, setChannel] = useState(idMeeting || '');
-  const [openChatBox, setOpenChatBox] = useState(true)
+  const [openChatBox, setOpenChatBox] = useState(false)
+  const [openPrescription, setOpenPrescription] = useState(false)
   const [isMuted, setIsMuted] = useState(false);
 
 
@@ -147,6 +150,43 @@ export const VideoRoom = () => {
 
   return (
     <>
+<Box 
+  onClick={() => setOpenPrescription(true)}
+  sx={{
+    position: 'fixed',
+    bottom: '20px', // Move to bottom of the screen
+    right: '20px', // Move to the left side of the screen
+    width: '60px', // Set width to make it circular
+    height: '60px', // Set height to make it circular
+    borderRadius: '50%', // Circular shape
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'primary.main',
+    cursor: 'pointer',
+    boxShadow: 2, // Optional: add shadow for a better look
+  }}
+>
+  <IconButton sx={{ color: 'white' }}>
+    <MedicalServicesIcon /> {/* Add your icon here */}
+  </IconButton>
+</Box>
+
+<Dialog open={openPrescription}  fullWidth maxWidth="md" onClose={() => setOpenPrescription(false)}
+
+    sx={{
+      position:  'fixed',
+      right: '10px',
+      top: '50px',
+      width: '550px', 
+      height: 'calc(90vh)'
+    }}>
+    <PrescriptionComponent sx={{
+      with:'100%',
+    }} idMeeting={idMeeting} />
+    </Dialog>
+
+
   <Box onClick={() => setOpenChatBox(true)}
   sx={{
     position:'fixed',
@@ -265,9 +305,11 @@ export const VideoRoom = () => {
   >
     {isMuted ? 'Unmute Voice' : 'Mute Voice'}
   </Button>
+  <AudioVideoRecorder></AudioVideoRecorder>
 </Box>
 
     </Box>
+   
     </>
   );
 };
