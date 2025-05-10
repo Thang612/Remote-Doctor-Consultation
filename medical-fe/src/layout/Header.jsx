@@ -24,6 +24,9 @@ import { onValue, ref } from "firebase/database";
 import { db } from "../configs/firebase";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";
+import ChatIcon from '@mui/icons-material/Chat';
+import ForumIcon from '@mui/icons-material/Forum';
+
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -35,6 +38,8 @@ const Header = () => {
   const [notify, setNotify] = useState(["Không có thông báo"])
   const [UnseenNotifications, setUnseenNotifications] = useState()
   const [openChatBox, setOpenChatBox] = useState(false);
+  const [consultAnchorEl, setConsultAnchorEl] = useState(null);
+
   
   // ✅ Hàm xử lý đăng nhập bằng Google
   const handleGoogleLogin = async (credentialResponse) => {
@@ -110,7 +115,35 @@ const Header = () => {
     <AppBar position="static" color="primary">
       <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
         <img src={logo} alt="KhamBenhNe" style={{ height: "80px" }}  />
-
+        <Box onMouseEnter={(e) => setConsultAnchorEl(e.currentTarget)} onMouseLeave={() => setConsultAnchorEl(null)}>
+  <Button
+    color="inherit"
+    sx={{ fontWeight: 'bold', textTransform: 'none' }}
+  >
+    Tư vấn bệnh
+  </Button>
+  <Menu
+    anchorEl={consultAnchorEl}
+    open={Boolean(consultAnchorEl)}
+    onClose={() => setConsultAnchorEl(null)}
+    MenuListProps={{
+      onMouseEnter: () => setConsultAnchorEl(consultAnchorEl),
+      onMouseLeave: () => setConsultAnchorEl(null),
+    }}
+  >
+    <MenuItem>
+    <Link to='/prediction'>
+      <ChatIcon sx={{ mr: 1 }} />
+      Nhắn tin</Link>
+    </MenuItem>
+    <MenuItem>
+    <Link to='/voicechat'>
+      <ForumIcon sx={{ mr: 1 }} />
+      Hội thoại
+      </Link>
+    </MenuItem>
+  </Menu>
+</Box>
         {!user ? (
           <>
             <Button color="inherit" onClick={() => setOpenDialog(true)}>

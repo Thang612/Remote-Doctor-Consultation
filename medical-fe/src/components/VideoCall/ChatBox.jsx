@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Box, TextField, IconButton, List, ListItem, Typography, Select, MenuItem, Tooltip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import MicIcon from '@mui/icons-material/Mic';
 import GTranslateIcon from '@mui/icons-material/GTranslate';
 import { onValue, push, ref } from 'firebase/database';
 import { db } from '../../configs/firebase';
 import { UserContext } from '../../App';
 import { translateMessage } from '../../configs/translate';
+import languages from '../../configs/languages'; // Import ngôn ngữ từ file riêng
 
 const ChatBox = ({ idMeeting }) => {
   const [user] = useContext(UserContext);
@@ -13,18 +15,51 @@ const ChatBox = ({ idMeeting }) => {
   const [input, setInput] = useState('');
   const [language, setLanguage] = useState('en');
   const [translatedMessages, setTranslatedMessages] = useState({});
+  const [isRecording, setIsRecording] = useState(false);  // Trạng thái ghi âm
+  const recognitionRef = useRef(null);
   const chatRef = useRef(null);
 
-  const languages = {
-    en: 'English',
-    vi: 'Vietnamese',
-    es: 'Spanish',
-    fr: 'French',
-    de: 'German',
-    ja: 'Japanese',
-    zh: 'Chinese',
-  };
+  // Hàm nhận dạng giọng nói
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'vi';  // Ngôn ngữ nhận diện giọng nói mặc định là tiếng Việt
 
+      recognitionRef.current.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setInput(transcript);  // Cập nhật văn bản trong ô nhập tin nhắn
+      };
+
+      recognitionRef.current.onstart = () => {
+        console.log('Speech recognition started');
+        setIsRecording(true);
+      };
+
+      recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended');
+        setIsRecording(false);
+      
+        if (input.trim()) {
+          handleSendMessage(); // Gửi tin nhắn sau khi ghi âm hoàn tất
+        }
+      };
+      
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+    } else {
+      console.warn('Web Speech API không hỗ trợ trên trình duyệt này.');
+    }
+  }, []);
+
+  // Đọc tin nhắn
   useEffect(() => {
     if (!idMeeting) return;
 
@@ -55,7 +90,7 @@ const ChatBox = ({ idMeeting }) => {
     }
   };
 
-  // ✅ Gửi tin nhắn lên Firebase
+  // Gửi tin nhắn lên Firebase
   const handleSendMessage = async () => {
     if (input.trim()) {
       const newMessage = {
@@ -64,8 +99,8 @@ const ChatBox = ({ idMeeting }) => {
         avatar: user?.doctor
           ? `/avatar_doctor/${user?.doctor?.id}.png`
           : user?.patient
-            ? `/avatar_patient/${user?.patient?.id}.png`
-            : '/default_avatar.png',
+          ? `/avatar_patient/${user?.patient?.id}.png`
+          : '/default_avatar.png',
         timestamp: new Date().toLocaleTimeString(),
       };
 
@@ -74,6 +109,21 @@ const ChatBox = ({ idMeeting }) => {
       setInput('');
     }
   };
+
+  // Bắt đầu ghi âm khi giữ nút mic
+  const startRecording = () => {
+    if (recognitionRef.current && !isRecording) {
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      // Không gọi handleSendMessage ở đây
+    }
+  };
+  
 
   return (
     <Box
@@ -88,7 +138,7 @@ const ChatBox = ({ idMeeting }) => {
         overflow: 'hidden',
       }}
     >
-      {/* ✅ Header */}
+      {/* Header */}
       <Box
         sx={{
           backgroundColor: 'primary.main',
@@ -101,7 +151,7 @@ const ChatBox = ({ idMeeting }) => {
       >
         Chatbox
 
-        {/* ✅ Chọn ngôn ngữ */}
+        {/* Chọn ngôn ngữ */}
         <Select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
@@ -112,14 +162,14 @@ const ChatBox = ({ idMeeting }) => {
           }}
         >
           {Object.entries(languages).map(([code, name]) => (
-            <MenuItem key={code} value={code}>
+            <MenuItem key={code} value={name}>
               {name}
             </MenuItem>
           ))}
         </Select>
       </Box>
 
-      {/* ✅ Nội dung tin nhắn */}
+      {/* Nội dung tin nhắn */}
       <Box
         ref={chatRef}
         sx={{
@@ -150,7 +200,7 @@ const ChatBox = ({ idMeeting }) => {
                   <Typography>{msg.sender}</Typography>
                   <Typography>{msg.text}</Typography>
 
-                  {/* ✅ Bản dịch hiển thị tại đây */}
+                  {/* Bản dịch */}
                   {translatedMessages[index] && (
                     <Typography
                       variant="caption"
@@ -162,7 +212,7 @@ const ChatBox = ({ idMeeting }) => {
                   <Typography variant="caption">{msg.timestamp}</Typography>
                 </Box>
 
-                {/* ✅ Nút dịch */}
+                {/* Nút dịch */}
                 <Tooltip title="Translate">
                   <IconButton
                     size="small"
@@ -178,7 +228,7 @@ const ChatBox = ({ idMeeting }) => {
         </List>
       </Box>
 
-      {/* ✅ Thanh nhập tin nhắn */}
+      {/* Thanh nhập tin nhắn */}
       <Box sx={{ padding: '8px', display: 'flex' }}>
         <TextField
           value={input}
@@ -187,6 +237,19 @@ const ChatBox = ({ idMeeting }) => {
           fullWidth
           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
         />
+        
+        {/* Nút mic */}
+        <Tooltip title={isRecording ? "Stop recording" : "Hold to record"}>
+          <IconButton
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onMouseLeave={stopRecording}
+          >
+            <MicIcon color={isRecording ? 'secondary' : 'primary'} />
+          </IconButton>
+        </Tooltip>
+        
+        {/* Nút gửi */}
         <IconButton onClick={handleSendMessage}>
           <SendIcon />
         </IconButton>

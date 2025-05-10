@@ -10,6 +10,8 @@ import { createContext, useEffect, useReducer } from 'react';
 import Profile from './pages/Profile/Profile';
 import UserReducer from './reducers/UserReducer';
 import { VideoRoom } from './VideoCall/VideoRoom';
+import ChatInterface from './pages/Prediction/Prediction';
+import VoiceChatBot from './pages/Prediction/VoiceChatBot';
 
 export const UserContext = createContext()
 
@@ -32,6 +34,8 @@ const App =() => {
         <Route path='/doctor/:id' element={<DoctorDetail/>}></Route>
         <Route path='/profile' element={<Profile/>}></Route>
         <Route path='/videocall/:idMeeting' element={<VideoRoom/>}></Route>
+        <Route path='/prediction' element={<ChatInterface/>}></Route>
+        <Route path='/voicechat' element={<VoiceChatBot/>}></Route>
       </Routes>
     </BrowserRouter>
     </ThemeProvider>

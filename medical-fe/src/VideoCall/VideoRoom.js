@@ -179,7 +179,8 @@ export const VideoRoom = () => {
       right: '10px',
       top: '50px',
       width: '550px', 
-      height: 'calc(90vh)'
+      height: 'calc(90vh)',
+      
     }}>
     <PrescriptionComponent sx={{
       with:'100%',
@@ -235,7 +236,8 @@ export const VideoRoom = () => {
       sx={{ 
         display: 'flex', 
         flexDirection: 'column', 
-        height: 'calc(100vh - 80px)' 
+        height: 'calc(100vh - 80px)' ,
+        overflow: 'hidden'
       }}
     >
       {/* Khung video */}
@@ -303,6 +305,7 @@ export const VideoRoom = () => {
     sx={{ marginLeft: '8px' }}
     color={isMuted ? 'error' : 'primary'}
   >
+    
     {isMuted ? 'Unmute Voice' : 'Mute Voice'}
   </Button>
   <AudioVideoRecorder></AudioVideoRecorder>

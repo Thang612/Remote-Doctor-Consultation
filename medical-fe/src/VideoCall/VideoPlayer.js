@@ -22,7 +22,7 @@ export const VideoPlayer = ({ user, isLocal, username, style, avatar }) => {
       {/* Hiển thị video */}
       <div ref={videoRef} style={{ width: '100%', height: '100%' }} />
 
-      {/* Hiển thị username */}
+      {/* Hiển thị username
       <div style={{
         display:'flex',
         alignItems: 'center',
@@ -41,7 +41,7 @@ export const VideoPlayer = ({ user, isLocal, username, style, avatar }) => {
                   sx={{ width: 28, height: 28, marginRight: '8px' }} 
                 />
         {username}
-      </div>
+      </div> */}
     </div>
   );
 };

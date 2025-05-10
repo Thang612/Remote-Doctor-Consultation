@@ -19,4 +19,22 @@ export class TranslateController {
     );
     return { translatedText };
   }
+
+  @Post('/prediction')
+  async diseasePrediction(@Body() body: { userChat: []; botChat: [] }) {
+    const prediction = await this.translateService.diseasePrediction(
+      body.userChat,
+      body.botChat,
+    );
+    return prediction;
+  }
+
+  @Post('/voiceprediction')
+  async voicePrediction(@Body() body: { userChat: []; botChat: [] }) {
+    const prediction = await this.translateService.voicePrediction(
+      body.userChat,
+      body.botChat,
+    );
+    return prediction;
+  }
 }
